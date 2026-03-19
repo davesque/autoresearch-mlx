@@ -41,6 +41,12 @@ SwiGLU with 8/3x hidden dim reduced params from ~11.5M to ~11.6M (actually simil
 
 GC gave 1.692 vs 1.613. Centering gradients may conflict with the existing QK-norm + RMSNorm setup, or the model may be too small for the implicit regularization to help.
 
+## Value embeddings are critical at this scale (high confidence)
+
+Removing VE dropped params from 11.5M to 7.3M (VE = 36% of total params!) and val_bpb from 1.402 to 1.543. VE is not dead weight — it provides substantial model capacity via input-dependent value bias. At dim=256 with only 4 layers, these extra embedding parameters are essential.
+
+**Implication**: Don't try to simplify VE away. If anything, VE could be expanded (e.g., add VE to every layer instead of alternating). But the current alternating pattern is a reasonable efficiency trade-off.
+
 ## Cautious Adam is too aggressive with rescaling (medium confidence)
 
 C-Adam with the standard rescaling factor gave 1.846 vs 1.613 — a dramatic regression. The mask * (size/sum(mask)) rescaling amplifies surviving updates too much. A version *without* the rescaling factor might be worth trying, but the signal is strongly negative.
