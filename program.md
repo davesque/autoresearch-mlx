@@ -110,6 +110,27 @@ The idea is that you are a completely autonomous researcher trying things out. I
 
 **Crashes**: If a run crashes (OOM, or a bug, or etc.), use your judgment: If it's something dumb and easy to fix (e.g. a typo, a missing import), fix it and re-run. If the idea itself is fundamentally broken, just skip it, log "crash" as the status in the tsv, and move on.
 
-**NEVER STOP**: Once the experiment loop has begun (after the initial setup), do NOT pause to ask the human if you should continue. Do NOT ask "should I keep going?" or "is this a good stopping point?". The human might be asleep, or gone from a computer and expects you to continue working *indefinitely* until you are manually stopped. You are autonomous. If you run out of ideas, think harder — read papers referenced in the code, re-read the in-scope files for new angles, try combining previous near-misses, try more radical architectural changes. The loop runs until the human interrupts you, period.
+**NEVER STOP**: Once the experiment loop has begun (after the initial setup), do NOT pause to ask the human if you should continue. Do NOT ask "should I keep going?" or "is this a good stopping point?". The human might be asleep, or gone from a computer and expects you to continue working *indefinitely* until you are manually stopped. You are autonomous. If you run out of ideas, think harder — consult the literature (see below), re-read the in-scope files for new angles, try combining previous near-misses, try more radical architectural changes. The loop runs until the human interrupts you, period.
+
+## Literature consultation
+
+You should actively consult recent ML research to source experiment ideas. This is not a replacement for your own reasoning — it supplements it.
+
+**When to consult the literature:**
+- At the start of a run, before your first non-baseline experiment, to build a prioritized list of ideas grounded in recent findings.
+- When you've exhausted your current ideas or hit a plateau (e.g. 3+ consecutive discards).
+- When an experiment produces a surprising result (good or bad) and you want to understand why.
+
+**How to do it:**
+1. Use web search to find recent papers from venues like ICML, NeurIPS, ICLR, and arXiv on topics relevant to your current line of experimentation (e.g. "efficient transformer training", "learning rate schedules small LLMs", "muon optimizer improvements").
+2. When you find a promising paper, fetch its abstract and key results. If the full paper is available as a web page (e.g. on arXiv HTML or OpenReview), read the methodology section for implementation details.
+3. Extract the **specific, actionable idea** — a concrete hyperparameter, architectural modification, or training trick — and translate it into a modification of `train.py`.
+4. Save your notes on each paper to the `literature/` directory. Use one file per paper, named by arXiv ID or a short slug (e.g. `literature/2405.20233-grokfast.md`). Include the title, authors, venue, key findings, and how they might apply to this setup. This builds a persistent knowledge base across runs.
+
+**Rules:**
+- Do NOT spend more than ~2 minutes on any single literature search. You are an experimentalist, not a literature reviewer. Get the idea, try it, move on.
+- Do NOT blindly copy findings. Papers train on different data, at different scales, with different budgets. Adapt the idea to this setup (Apple Silicon, 5-minute budget, ~50M params, BPB metric).
+- DO log what paper inspired an experiment in the `description` column of results.tsv (e.g. "GrokFast EMA gradient filter (arXiv:2405.20233)").
+- DO revisit the literature when you notice a pattern in your results that you don't fully understand — a paper may explain it.
 
 As an example use case, a user might leave you running while they sleep. If each experiment takes you ~7 minutes then you can run approx 8-9/hour, for a total of about 70 over the duration of the average human sleep. The user then wakes up to experimental results, all completed by you while they slept!
