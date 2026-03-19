@@ -53,3 +53,14 @@ The model in `train.py` is a GPT variant with:
 ## Literature Consultation
 
 Agents should actively consult recent ML research (arXiv, ICML, NeurIPS, ICLR) to source experiment ideas. Notes are saved to `literature/` (one file per paper). See `program.md` for the full protocol.
+
+## Strategy Knowledge Base
+
+The `strategy/` directory is a persistent decision-support system updated after every experiment. It contains curated analysis (not raw logs) that informs experiment selection:
+
+- **`strategy/learnings.md`** — Hardware/config-specific insights with confidence levels (e.g., "this model is step-count-limited")
+- **`strategy/hypotheses.md`** — Prioritized queue of untested experiment ideas with rationale
+- **`strategy/near-misses.md`** — Experiments within noise margin that deserve revisiting after config changes
+- **`strategy/interactions.md`** — Known parameter couplings (e.g., batch size ↔ LR scaling)
+
+The experiment loop in `program.md` includes a pre-experiment checklist that requires consulting these files and a post-experiment step that requires updating them. See `program.md` for full details.
