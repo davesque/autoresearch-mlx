@@ -34,7 +34,7 @@ Consult this before testing any change in isolation — if the parameter is coup
 
 ### Weight decay ↔ Batch size
 - **Hypothesis**: Smaller batches provide implicit regularization through gradient noise. Explicit weight decay may need to decrease as batch size decreases.
-- **Evidence**: None yet. Worth testing.
+- **Evidence**: WD=0.1 at batch=2^14 gave 1.418 vs WD=0.2 at 1.402. Hypothesis REJECTED — the model wants WD=0.2 regardless of batch size. Explicit regularization remains important even with noisy small-batch gradients.
 
 ### HEAD_DIM ↔ Per-step compute
 - **Hypothesis**: Smaller head dim increases attention compute. At step-count-dominated regimes, this trade-off is unfavorable.

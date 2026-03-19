@@ -14,12 +14,10 @@ Each entry tracks: the hypothesis, expected mechanism, dependencies, and status.
 - **Status**: Untested (0.02 and 0.06 tested and discarded)
 - **Priority**: LOW (deprioritized — diminishing returns likely)
 
-### H2: Reduce weight decay
+### H2: Reduce weight decay (**TESTED — DISCARD**)
 - **Change**: WEIGHT_DECAY from 0.2 → 0.1
-- **Rationale**: With more steps and smaller batches, the model sees more gradient updates. Higher weight decay may be over-regularizing. The README notes "lower regularization" was a winner on M4 Max #2.
-- **Risk**: Low
-- **Status**: Untested
-- **Priority**: HIGH
+- **Result**: 1.418 vs 1.402 — worse. Model wants the regularization even at high step counts.
+- **Status**: Resolved — WD=0.2 is good. Could try 0.3 (more decay) but unlikely to help given this result.
 
 ### H3: Cosine warmdown (instead of linear)
 - **Change**: Replace linear warmdown with `0.5 * (1 + cos(pi * cooldown_progress))`
