@@ -25,9 +25,9 @@ Three data points: LR=0.02→1.412, LR=0.04→1.402, LR=0.06→1.495. The optimu
 
 **Implication**: Don't waste runs on further MATRIX_LR tuning. Focus on other dimensions. If architecture changes significantly (depth, width, activation), LR may need re-tuning, but 0.04 is a good default.
 
-## Warmdown ratio matters at short budgets (medium confidence)
+## WARMDOWN_RATIO=0.3 is the sweet spot (high confidence)
 
-Reducing WARMDOWN_RATIO from 0.5 to 0.3 gave a small but real win (1.623 → 1.613). Spending 50% of a 5-minute budget in LR decay is too conservative. The current 0.3 (70% at peak LR) seems reasonable. Could try 0.2 but diminishing returns likely.
+Three data points: 0.5→1.623, 0.3→1.613 (at old batch), 0.2→1.429 (at batch=2^14). The 0.5→0.3 change was a clear win. But 0.3→0.2 was a big regression at the current config. The model needs sufficient cooldown time — ~30% of training spent in LR decay appears optimal. Not worth tuning further.
 
 ## Logit soft-capping is neutral at this scale (low confidence)
 
