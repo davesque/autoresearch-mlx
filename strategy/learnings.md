@@ -49,6 +49,12 @@ Removing VE dropped params from 11.5M to 7.3M (VE = 36% of total params!) and va
 
 **Implication**: Don't try to simplify VE away. If anything, VE could be expanded (e.g., add VE to every layer instead of alternating). But the current alternating pattern is a reasonable efficiency trade-off.
 
+## EMA of weights hurts at this training length (medium confidence)
+
+EMA with decay=0.99 (1.452) and 0.995 (1.496) both worse than raw weights (1.402). Two reasons: (1) EMA update costs compute per step, reducing total steps from ~1600 to ~1560. (2) The linear warmdown schedule already produces a well-converged final checkpoint — the last weights ARE the best weights. EMA averages in earlier, worse checkpoints.
+
+**Implication**: Don't use EMA unless the training schedule changes (e.g., constant LR with no warmdown, where the final checkpoint is noisy). The current warmdown serves the same purpose as EMA — it produces smooth convergence.
+
 ## Cautious Adam is too aggressive with rescaling (medium confidence)
 
 C-Adam with the standard rescaling factor gave 1.846 vs 1.613 — a dramatic regression. The mask * (size/sum(mask)) rescaling amplifies surviving updates too much. A version *without* the rescaling factor might be worth trying, but the signal is strongly negative.
