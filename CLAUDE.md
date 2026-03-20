@@ -21,7 +21,7 @@ There are no tests, linter, or build steps — this is a research experiment rep
 Only two Python files, both at the top level:
 
 - **`prepare.py`** — READ-ONLY. Contains fixed constants (`MAX_SEQ_LEN=2048`, `TIME_BUDGET=300`, `EVAL_TOKENS`), data downloading/sharding, BPE tokenizer training (via `rustbpe`), the `make_dataloader` (BOS-aligned best-fit packing), and `evaluate_bpb` (the ground-truth metric). Never modify this file during experiments.
-- **`train.py`** — The ONLY file the agent edits. Contains the GPT model (with RoPE, sliding window attention, value embeddings, residual lambdas), a custom `AdamW` optimizer with per-parameter-group LR/decay, hyperparameter constants, and the training loop. All hyperparameters are module-level constants (no CLI flags).
+- **`train.py`** — The ONLY file the agent edits. Contains the GPT model (with RoPE, Peri-LN, value embeddings, sparse attention gate, residual lambdas), a hybrid Muon/AdamW optimizer, hyperparameter constants, and the training loop. All hyperparameters are module-level constants (no CLI flags).
 
 Key data flow: `prepare.py` exports `Tokenizer`, `make_dataloader`, `evaluate_bpb`, `MAX_SEQ_LEN`, and `TIME_BUDGET` → `train.py` imports and uses them.
 
@@ -42,13 +42,21 @@ The full protocol is in `program.md`. Key rules:
 
 The model in `train.py` is a GPT variant with:
 - Configurable depth/width via `DEPTH` and `ASPECT_RATIO` constants (model_dim derived as `DEPTH * ASPECT_RATIO`, rounded up to `HEAD_DIM`)
-- Sliding window attention pattern (`WINDOW_PATTERN = "SSSL"` — short/long alternating)
-- Value Embeddings (VE) on alternating layers with gated addition
-- RMSNorm-style normalization (inline `norm` function)
-- Squared ReLU activation in MLP
+- Full causal attention on all layers (`WINDOW_PATTERN = "LLLL"`)
+- Value Embeddings (VE) on all layers with gated addition (gate uses 128 input channels)
+- Peri-LN normalization (pre-norm and post-norm on each sub-layer, using `mx.fast.rms_norm`)
+- Sparse attention gate (per-head sigmoid gate on 12 input dimensions, from nanoGPT speedrun Record 28)
+- Squared ReLU activation in MLP (4x expansion)
 - Logit soft-capping at 15.0
 - Residual lambdas and x0 skip connections
 - Training in bfloat16, optimizer state in float32
+
+## Optimizer Details
+
+The optimizer is a hybrid Muon/AdamW:
+- **Muon** (Newton-Schulz matrix sign, 5 iterations) with Nesterov momentum for all 2D weight matrices in blocks. Uses beta1=0.9, LR=0.01, weight decay=0.1.
+- **AdamW** for embeddings (wte, value_embeds), output head (lm_head), and scalar parameters (resid_lambdas, x0_lambdas). Per-parameter-group learning rates.
+- 5% warmup, 25% linear warmdown to zero.
 
 ## Literature Consultation
 
