@@ -86,6 +86,10 @@ EMA with decay 0.99 and 0.995 both worse than raw weights. The linear warmdown a
 
 ---
 
+## HEAD_DIM=128 (2 heads) is optimal on this hardware (high confidence)
+
+HEAD_DIM=64 (4 heads) tested twice: 1.695 at old config (351 steps), 1.329 at current config (1327 steps). Consistently ~13% fewer steps due to more expensive attention. Even with Muon, the step penalty is too large. MLX's scaled_dot_product_attention is better optimized for larger head dims.
+
 ## Dead Ends
 
 - Gradient centralization: 1.692 (conflicts with existing normalization)
