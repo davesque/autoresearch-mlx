@@ -17,3 +17,4 @@ d4f26f3	1.295456	21.2	keep	Muon beta1=0.9 (less momentum, faster response)
 eeafba2	1.289558	21.2	keep	mx.fast.rms_norm replacing inline norm() (+96 steps from faster kernel)
 462afa9	1.286646	21.2	keep	sparse attention gate (nanoGPT Record 28, per-head gating)
 12d27a0	1.283296	21.2	keep	Nesterov momentum in Muon
+279dbc1	1.280304	21.2	keep	add 5% warmup for Muon stability
