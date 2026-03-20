@@ -47,6 +47,16 @@ Changing WINDOW_PATTERN from "SSSL" to "LLLL" gave 1.394 vs 1.402 — an improve
 
 Three data points: 0.5→1.623, 0.3→1.613 (at old batch), 0.2→1.429 (at batch=2^14). The 0.5→0.3 change was a clear win. But 0.3→0.2 was a big regression at the current config. The model needs sufficient cooldown time — ~30% of training spent in LR decay appears optimal. Not worth tuning further.
 
+## Peri-LN is the biggest single-experiment architectural win (high confidence)
+
+Adding post-sub-layer normalization (`x = x + norm(attn(norm(x)))`) gave 1.363 vs 1.387 — a 0.024 improvement with negligible compute cost (~1588 vs 1611 steps). This stabilizes variance growth through the residual stream. Adopted by Gemma 2 and OLMo 2.
+
+**Implication**: The model benefits from tighter variance control. Other normalization experiments (learnable RMSNorm: worse, DyT: much worse) suggest that the specific combination of fixed RMSNorm + peri-LN placement is important — not just any normalization will do.
+
+## Logit softcap = 15 is better than 30 with peri-LN (medium confidence)
+
+Softcap 30 gave 1.370 vs softcap 15 at 1.363. The tighter cap works better, possibly because peri-LN already controls variance so the model doesn't need wider logit range.
+
 ## Logit soft-capping helps training quality (high confidence)
 
 Removing logit capping gives more steps (1794 vs 1600 — the tanh costs compute) but worse val_bpb (1.430 vs 1.402). The cap constrains logit magnitude which stabilizes gradients and improves per-step learning efficiency. This is NOT dead weight — it's an active training quality improvement. Do not remove.
