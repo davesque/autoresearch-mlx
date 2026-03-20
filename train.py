@@ -236,7 +236,7 @@ class AdamW:
                     "lr": matrix_lr,
                     "betas": (0.9, 0.95),
                     "eps": 1e-10,
-                    "weight_decay": weight_decay,
+                    "weight_decay": 0.1,
                     "muon": True,
                 }
             elif "wte" in path:
