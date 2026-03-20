@@ -37,6 +37,12 @@ Three data points: LR=0.02→1.412, LR=0.04→1.402, LR=0.06→1.495. The optimu
 
 **Implication**: Don't waste runs on further MATRIX_LR tuning. Focus on other dimensions. If architecture changes significantly (depth, width, activation), LR may need re-tuning, but 0.04 is a good default.
 
+## Full attention beats sliding window at 4 layers (high confidence)
+
+Changing WINDOW_PATTERN from "SSSL" to "LLLL" gave 1.394 vs 1.402 — an improvement with MORE steps (1645 vs 1600). Two wins: (1) full context visibility on all layers is more expressive, (2) uniform mask = better caching = slightly faster per step. At 4 layers, restricting 3 of them to half-context windows is too aggressive.
+
+**Implication**: Simplifications that remove unnecessary constraints can win on both quality and speed. The sliding window pattern makes more sense at higher depth where some layers can afford limited context.
+
 ## WARMDOWN_RATIO=0.3 is the sweet spot (high confidence)
 
 Three data points: 0.5→1.623, 0.3→1.613 (at old batch), 0.2→1.429 (at batch=2^14). The 0.5→0.3 change was a clear win. But 0.3→0.2 was a big regression at the current config. The model needs sufficient cooldown time — ~30% of training spent in LR decay appears optimal. Not worth tuning further.
