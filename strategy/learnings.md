@@ -61,7 +61,13 @@ SwiGLU with 8/3x hidden dim reduced params from ~11.5M to ~11.6M (actually simil
 
 GC gave 1.692 vs 1.613. Centering gradients may conflict with the existing QK-norm + RMSNorm setup, or the model may be too small for the implicit regularization to help.
 
-## Value embeddings are critical at this scale (high confidence)
+## Value embeddings: more is better (high confidence)
+
+VE on all 4 layers (instead of alternating 2) gave 1.388 vs 1.394 — a clear win. Added 4.2M params (11.5M → 15.7M) with negligible compute cost (embedding lookups are fast on MLX). VE is one of the most efficient ways to add model capacity because it's just a lookup table, not a matrix multiply.
+
+**Implication**: VE is high-value-per-FLOP capacity. If we need more model capacity, VE expansion is the cheapest way to get it. However, removing VE entirely was devastating (1.543 at 7.3M params), confirming it's load-bearing.
+
+## OLD: Value embeddings are critical at this scale (high confidence)
 
 Removing VE dropped params from 11.5M to 7.3M (VE = 36% of total params!) and val_bpb from 1.402 to 1.543. VE is not dead weight — it provides substantial model capacity via input-dependent value bias. At dim=256 with only 4 layers, these extra embedding parameters are essential.
 
