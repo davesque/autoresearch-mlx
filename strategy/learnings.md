@@ -13,6 +13,8 @@ Muon uses beta1=0.95 (higher momentum than Adam's 0.8) and 5 Newton-Schulz itera
 
 **Implication**: The "per-step compute overhead kills everything" rule has an exception — when the change dramatically improves optimization quality per step. Muon is the biggest known optimizer win from the nanoGPT speedrun and it carries over to MLX.
 
+**Muon LR sweep**: 0.04→1.344, 0.02→1.318, 0.01→1.306, 0.005→1.311. Optimum at 0.01 — much lower than Adam's 0.04. Muon's orthogonal updates are more powerful per step so lower LR prevents overshooting. Don't tune further; 0.01 is confirmed.
+
 ## Per-step compute overhead is the dominant constraint (high confidence, but with exception)
 
 At this model scale (11.5M params, dim=256), the model is so fast per step that ANY added computation — even tiny things like z-loss logsumexp, EMA weight updates, or an extra multiply for embed shortcircuit — costs measurable steps. Results:
