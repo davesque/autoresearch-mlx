@@ -77,6 +77,8 @@ class CausalSelfAttention(nn.Module):
             else None
         )
         self.rope = nn.RoPE(self.head_dim, traditional=True, base=10000)
+        # Sparse attention gate (nanoGPT speedrun Record 28)
+        self.attn_gate = nn.Linear(12, self.n_head, bias=False)
 
     def __call__(self, x, ve, mask):
         batch_size, seq_len, _ = x.shape
@@ -99,6 +101,13 @@ class CausalSelfAttention(nn.Module):
         scale = 1.0 / math.sqrt(self.head_dim)
         y = mx.fast.scaled_dot_product_attention(q, k, v, scale=scale, mask=mask)
         y = y.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, -1)
+
+        # Per-head attention gate
+        head_gate = mx.sigmoid(self.attn_gate(x[..., :12]))
+        y = y.reshape(batch_size, seq_len, self.n_head, self.head_dim)
+        y = y * mx.expand_dims(head_gate, axis=-1)
+        y = y.reshape(batch_size, seq_len, -1)
+
         return self.c_proj(y)
 
 
@@ -161,6 +170,7 @@ class GPT(nn.Module):
             block.mlp.c_proj.weight = mx.zeros_like(block.mlp.c_proj.weight).astype(mx.bfloat16)
             if block.attn.ve_gate is not None:
                 block.attn.ve_gate.weight = mx.zeros_like(block.attn.ve_gate.weight).astype(mx.bfloat16)
+            block.attn.attn_gate.weight = mx.zeros_like(block.attn.attn_gate.weight).astype(mx.bfloat16)
 
         self.resid_lambdas = mx.ones((self.config.n_layer,), dtype=mx.float32)
         self.x0_lambdas = mx.full((self.config.n_layer,), 0.1, dtype=mx.float32)

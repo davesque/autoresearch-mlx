@@ -15,3 +15,4 @@ cc61926	1.317948	21.2	keep	lower MATRIX_LR to 0.02 (re-tune for Muon)
 d4f26f3	1.295456	21.2	keep	Muon beta1=0.9 (less momentum, faster response)
 6aaf1a8	1.294827	21.2	keep	reduce Muon weight decay from 0.2 to 0.1
 eeafba2	1.289558	21.2	keep	mx.fast.rms_norm replacing inline norm() (+96 steps from faster kernel)
+462afa9	1.286646	21.2	keep	sparse attention gate (nanoGPT Record 28, per-head gating)
