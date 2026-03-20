@@ -14,3 +14,4 @@ cc61926	1.317948	21.2	keep	lower MATRIX_LR to 0.02 (re-tune for Muon)
 545aa46	1.300201	21.2	keep	halve EMBEDDING_LR from 0.6 to 0.3
 d4f26f3	1.295456	21.2	keep	Muon beta1=0.9 (less momentum, faster response)
 6aaf1a8	1.294827	21.2	keep	reduce Muon weight decay from 0.2 to 0.1
+eeafba2	1.289558	21.2	keep	mx.fast.rms_norm replacing inline norm() (+96 steps from faster kernel)
