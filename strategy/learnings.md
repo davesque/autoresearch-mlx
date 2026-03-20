@@ -5,6 +5,18 @@ Updated after every experiment. Each entry explains *why* something worked or di
 
 ---
 
+## Per-step compute overhead is the dominant constraint (high confidence)
+
+At this model scale (11.5M params, dim=256), the model is so fast per step that ANY added computation — even tiny things like z-loss logsumexp, EMA weight updates, or an extra multiply for embed shortcircuit — costs measurable steps. Results:
+- Z-loss: 1.406 (lost ~70 steps, delta +0.004)
+- EMA: 1.452 (lost ~40 steps, but also averaged in stale weights)
+- Embed shortcircuit: 1.415 (lost ~50 steps)
+- Removing logit cap: 1.430 (GAINED 194 steps but worse per-step learning)
+
+The last point is key: logit cap removal added steps but hurt quality, proving that per-step quality and step count both matter. The current model sits at a precise balance point. Winning changes must either: (1) improve per-step quality WITHOUT adding compute, or (2) add so much per-step quality that the step loss is worth it (which means a big architectural shift, not a small regularizer).
+
+**Implication**: Focus on changes that are compute-neutral (e.g., different weight initialization, different optimizer schedule shape) or on bigger architectural shifts where the quality-per-step gain is large enough to overcome step loss.
+
 ## Single-machine, sequential-only constraint (hard constraint)
 
 All experiments run on one M4 Max laptop. No parallel training jobs — concurrent runs produce incomparable results due to GPU contention and non-deterministic scheduling. This means every experiment costs ~7 minutes of wall time with no shortcut. The strategy knowledge base exists specifically to compensate: invest thinking time (consulting hypotheses, interactions, near-misses) to make each of those 7-minute slots count. Bad experiment picks are the main bottleneck, not compute.
