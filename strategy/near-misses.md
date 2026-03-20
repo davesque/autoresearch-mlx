@@ -6,11 +6,10 @@ Each entry records: the change, the result, the context it was tested in, and wh
 
 ---
 
-## Remove logit soft-capping
-- **Result**: 1.626 vs 1.623 baseline (delta: +0.003)
-- **Context**: Tested at batch=2^16, warmdown=0.5, MATRIX_LR=0.04
-- **Why revisit**: Delta was within noise. Config has changed dramatically since (batch=2^14, warmdown=0.3). The README notes "no logit cap" was a repeated winner on M4 Max. Should be re-tested in current config.
-- **Priority**: High
+## Remove logit soft-capping (**RESOLVED — harmful**)
+- **Result at baseline**: 1.626 vs 1.623 (delta: +0.003)
+- **Result at current config**: 1.430 vs 1.402 (delta: +0.028) — much worse despite more steps
+- **Conclusion**: Logit cap is a genuine training quality improvement, not dead weight. Removing it gives more steps but each step is less effective. Do not revisit.
 
 ## Cosine warmdown + warmup (0.02)
 - **Result**: 1.409 vs 1.402 (delta: +0.007)

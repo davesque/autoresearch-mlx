@@ -29,9 +29,11 @@ Three data points: LR=0.02→1.412, LR=0.04→1.402, LR=0.06→1.495. The optimu
 
 Three data points: 0.5→1.623, 0.3→1.613 (at old batch), 0.2→1.429 (at batch=2^14). The 0.5→0.3 change was a clear win. But 0.3→0.2 was a big regression at the current config. The model needs sufficient cooldown time — ~30% of training spent in LR decay appears optimal. Not worth tuning further.
 
-## Logit soft-capping is neutral at this scale (low confidence)
+## Logit soft-capping helps training quality (high confidence)
 
-Removing logit capping gave 1.626 vs 1.623 baseline — within noise. Worth revisiting at the current config (batch=2^14, warmdown=0.3) since the context has changed significantly.
+Removing logit capping gives more steps (1794 vs 1600 — the tanh costs compute) but worse val_bpb (1.430 vs 1.402). The cap constrains logit magnitude which stabilizes gradients and improves per-step learning efficiency. This is NOT dead weight — it's an active training quality improvement. Do not remove.
+
+**Implication**: The cap value (15.0) could potentially be tuned but removing it entirely is harmful.
 
 ## SwiGLU needs param-count compensation (medium confidence)
 
