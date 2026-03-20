@@ -343,8 +343,9 @@ class AdamW:
         state["m"] = beta1 * state["m"] + (1 - beta1) * grad_f32
 
         if use_muon:
-            # Muon: matrix sign of momentum
-            update = self._newton_schulz(state["m"])
+            # Nesterov Muon: lookahead momentum for Newton-Schulz
+            nesterov_m = beta1 * state["m"] + (1 - beta1) * grad_f32
+            update = self._newton_schulz(nesterov_m)
             param_f32 = param_f32 * (1 - lr * weight_decay)
             param_f32 = param_f32 - lr * update
         else:
