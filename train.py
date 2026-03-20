@@ -234,7 +234,7 @@ class AdamW:
             if "blocks" in path and param.ndim == 2:
                 self.param_config[path] = {
                     "lr": matrix_lr,
-                    "betas": (0.95, 0.95),
+                    "betas": (0.9, 0.95),
                     "eps": 1e-10,
                     "weight_decay": weight_decay,
                     "muon": True,
